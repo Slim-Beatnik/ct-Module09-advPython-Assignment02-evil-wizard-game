@@ -140,6 +140,7 @@ class Mage(Character):
         else:
             self.team += [SummonedEntity(*summoned_creature), health = randint(30, 40), attack_power = randint(10, 20)]  # Add a new summoned entity to the team
             self.team[-1].invulnerable_turns = 1  # New summoned entity is invulnerable for 1 turn
+        self.align_minions()
             
     def sab_minor_heal_all_spell(self):
         heal_amount = randint(5, self.opponents[0].attack_power)  # Random heal amount between 5 and 20
@@ -223,11 +224,13 @@ class Archer(Character):
             self.team += [SummonEntity(f"turret{int(self.team[-1].name[-2:])}", 'Good Shot', 'Better Shot', health = 30, attack_power = 15)]
         else:
             self.team += [SummonEntity('turret01', 'Good Shot', 'Better Shot', health = 30, attack_power = 15)]
+        self.align_minions()
         # 85% chance of attacking successfully
         if randint(1, 20) > 3:
             self.team[-1].take_turn()
         else:
             print("The turret missed its first shot.")
+        
             
     def sab_one_step_ahead_evasion(self):
         self.invulnerable_turns = 7  # Invulnerable for 7 turns
@@ -256,8 +259,84 @@ class Archer(Character):
         
 class Paladin(Character):
     def __init__(self, name):
-        super().__init__(name, health=120, attack_power=30, action_points=8) 
+        super().__init__(name, health=120, attack_power=30, action_points=8)
+        
+    self.set_attack_names('Psalm', 'Religious Persecution')
+        # ['are shielded', 'will evade', 'have a magic barrier', 'will counter-attack']
+        self.invulnerable_type = self.invulnerable_type[2]  # have a magic barrier
+        
+        # special funcs will start with sab or sat, [s]pecial [ab]ility or [s]pecial [at]tack respectively
+        self.specials['1'] = {
+            'type': 'ability',
+            'func': self.sab_mini_me,
+            'args': [self],
+            'name': 'Mini-Me',
+            'print_phrase': "exit your corporeal form and convince an amount of you to stay and fight by your side.",
+            'description': "Keep a half-sized copy of yourself fighting you. Mini-Me, you complete me. They'll will attack right away."
+        }
+        self.specials['2'] = {
+            'type': 'ability',
+            'func': self.sab_righteous_favoritism,
+            'args': [self],
+            'name': 'Righteous Favoritism',
+            'print_phrase': 'pray, and something or someone listens. A shield of your faith galvanizes your aura. Er, for a little while.',
+            'description': 'Shield yourself (and your astral projection if available) for 3 turns.'
+        }
+        self.specials['3'] = {
+            'type': 'attack',
+            'func': self.sat_holy_lancers,
+            'args': [self],
+            'name': 'Holy Lancers',
+            'print_phrase': 'call an angelic army of lancers to furious stampeed. Their silent hoove-falls in distinct juxtaposition to the clamour of their lances against the enemy.',
+            'description': "Holy closers; tiny lancers. Summon a stampeed to strike each enemy at least twice."
+        }
+        self.specials['4'] = {
+            'type': 'attack',
+            'func': self.sat_holy_strike,
+            'args': [self],
+            'name': 'Holy Strike',
+            'print_phrase': "hold your sword aloft and its righteous aura sends a strike cutting towards the evil aura of the enemy.",
+            'description': "Break enemy shield. Hit the enemy for sure. Do up to double damage."
+        }
+        
+        #With a {verba[0]}, you {ability['desc']}. The evil wizard stands there {verba[1]}, almost in awe of such awesome power
+        # Your corpse will be paraded around the kingdom, the {verba[2]} {verba[3]} which will instill inaction for the coming generations.\nThe evil wizard's reign will be unending. All hope {verba[4]}
+        self.verba = ['prideful snear', 'disdainfully', 'face-less, armor-less, symbol-less mass of quartered body parts', 'piled into a shrine you would have never imagined', 'and faith lost forever.']
+
+    def sab_mini_me(self):
+        if len(self.team) > 1:
+            del self.team[1]
+            gc.collect()
+        self.team += [SummonEntity("Verne Troyer", self.attack_names['light'], self.attack_names['heavy'], health = 60, attack_power = 15)]
+        self.team[1].invulnerable_type = self.invulnerable_type
+        self.align_minions()
+        self.team[1].take_turn()
+    
+    def sab_righteous_favoritism(self):
+        for member in self.team:
+            member.invulnerable_turns = 3  # Shield for 3 turns
+        
+    def sat_holy_lancers(self):
+        for opp in self.opponents:
+            extra_hit = False
+            hit = randint(self.attack_power - 5, self.attack_power + 10)
+            damage = hit * 2
+            # chance for 3 attacks
+            if randint(1, 3) > 2:
+                extra_hit = True
+                damage += hit
+            opp.health -= damage
+            print(f"{opp.name} was hit {'thrice' if extra_hit else 'twice'} receiving {damage} damage")
+            
+    def sat_holy_strike(self):
+        for opp in self.opponents:
+            opp.invulnerable_turns = 0:
+                opp.health -= self.attack_power * 2
+                print(f"{opp.name} was hit twice receiving {self.attack_power * 2} damage")
     
 class Traveler(Character):
     def __init__(self, name):
         super().__init__(name, health=100, attack_power=20, action_points=20)
+        moves = [Warrior('dummy'), ]
+        self.specials = {}
+        self.attack_names

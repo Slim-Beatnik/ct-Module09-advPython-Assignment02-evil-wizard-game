@@ -44,7 +44,7 @@ class EvilWizard(Character):
     # Adjust for paralysis and cooldown - if cooldown wizard attack doesn't include specials. Action points regen after turn complete.
     def take_turn(self):
         if self.paralyzed_turns:
-            print('The wizard just stands there.')
+            print('fT{self.name} just stands there.')
             self.paralyzed_turns -= 1
         else:
             if self.action_points < 1:
@@ -90,6 +90,8 @@ class EvilWizard(Character):
                 del minion
                 gc.collect()  # Force garbage collection to remove the minion from memory
         self.team = [self, SummonedEntity('Mangled Abomination', 'Electrocution', 'Ethereal Smog', health = randint(30, 40), randint()), SummonedEntity('Enslaved Cherufe', 'Obsidian Fist', 'Molten Spray')]  # Summon two minions to fight for the wizard
+        self.align_minions()
+    
     
     # Heavy attack w/ effect
     def sat_dark_lightning_strike(self):
@@ -121,6 +123,6 @@ class SummonedEntity(Character):
     
     # randomly chooses between light and heavy attacks
     def take_turn(self):
-        opponent = opponents[-1] # summoned entities always attack last opponent
+        opponent = self.opponents[-1] # summoned entities always attack last opponent
         attack_output = [(self.light_attack(), self.attack_names['light']), (self.heavy_attack(), self.attack_names['heavy'])][randint(0, 1)]
         attack(*attack_output)

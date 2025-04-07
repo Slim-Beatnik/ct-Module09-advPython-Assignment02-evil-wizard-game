@@ -48,7 +48,7 @@ class Character:
         self.attack_names['heavy'] = heavy_attack_name
 
     def attack(self, attack_func):
-        if type(self) not in [EvilWizard, SummonedEntity]:
+        if type(self).__name__ in [EvilWizard, SummonedEntity]: # if npc class
             opponent = self.opponents[-1]
         else:
             opponent = self.target_opponent()
@@ -125,15 +125,66 @@ class Character:
             print("I don't know who that is, but they're not here. Please try again.")
             time.sleep(1)
             target_opponents(self.opponents)
+            
+    def align_minions(self):
+        for minion in self.team[1:]:
+            minion.team = self.team
+            minion.opponents = self.opponents
     
-    def end_turn(self):
-        decrement_status_turns = lambda stat: setattr(opponent, stat, max(0, getattr(opp, stat) - 1))
-        for opp in self.opponents:
-            decrement_status_turns(opp, 'invulnerable_turns')
-            decrement_status_turns(opp, 'paralyzed_turns')
-            decrement_status_turns(opp, 'cooldown_turns')
+    def take_turn(self):
+        while self.my_turn:
+            available_options = [1, 6]
+            print("\n--- Your Turn ---")
+            print("1. Focus Energy")
+            if self.action_points >=  1:
+                available_options.append(2)
+                print("2. Use Light Attack")
+            elif self.action_points >=  2:
+                available_options.append(3)
+                print("3. Use Heavy Attack")
+                if not self.cooldown:
+                    available_options.append(4)
+                    print("4. Use Specia)")
+            elif self.action_points >= 3:
+                available_options.append(5)
+                print("5. Heal")
+            print("6. View Stats")
+    
+
+            choice = input("Choose an action: ")
+            #disable actions based on if they are part of the action menu
+            if choice == '1':
+                self.attack(self.light_attack(self.attack_name['light']), wizard)
+            elif choice == '2' and choice in available_options:
+                self.attack(self.heavy_attack(self.attack_name['heavy']), wizard)
+            elif choice == '3' and choice in available_options:
+                specials_prompt()
+            elif choice == '4' and choice in available_options:
+                self.heal()
+                
+            elif choice == '5':
+                print(f'Player: ')
+                self.display_stats()
+                
+                print('Enemy Team:')
+                for opp in self.opponents:
+                    opp.display_stats()
+                
+                input('Press any key to return to the turn menu...')
+                turn_menu(self) # displaying stats doesn't skip turn
+            else:
+                print(f"{self.name}, don't fail us. Choose from the available options.")
+                turn_menu(self)
+            toggle_turn()
+        clear_dead()
     
     @classmethod
     def toggle_turn(cls):
-        cls.my_turn = not cls.my_turn
+        cls.my_turn = not cls.
         
+    def clear_dead(self):
+        for opp in opponents[1:]:
+            if opp.health <= 0:
+                print(f"{opp.name} is dead.")
+                del opp
+        gc.collect()
