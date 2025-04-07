@@ -82,7 +82,7 @@ class Warrior(Character):
 class Mage(Character):
     def __init__(self, name):
         super().__init__(name, health=100, attack_power=35, action_points=6)
-        self.set_attack_names('Fireball', 'White Lightning Bolt')
+        self.set_attack_names('Magic Pulse', 'White Lightning Bolt')
         # ['are shielded', 'will evade', 'have a magic barrier', 'will counter-attack']
         self.invulnerable_type = self.invulnerable_type[2]  # have a magic barrier
         
@@ -122,7 +122,8 @@ class Mage(Character):
         
         #With a {verba[0]}, you {ability['desc']}. The evil wizard stands there {verba[1]}, almost in awe of such awesome power
         # Your corpse will be paraded around the kingdom, the {verba[2]} {verba[3]} which will instill inaction for the coming generations.\nThe evil wizard's reign will be unending. All hope {verba[4]}
-        self.verba = ['a complete lack of grace', 'in utter disbelief', 'glinting', 'volcanic glass that was a person, is imortalized. The face, melting, frames a grimace of abject terror', 'is harder than your monument to failure.']
+        self.verba = ['a flourish', 'seething', 'ornate talisman buried in your chest.', 'The eternal prison of yours, ', 'is locked away with your slowly maddening psyche']
+
     
     def sab_summon_animal_friend(self):
         animal = [['Bear', 'Paw Swipe', 'Bite'], ['Wolf', 'Pounce', 'Bite'], ['Spider', 'Leg Strike', 'Venom Blast'],  ['Boar', 'Gouge', 'Tusks Charge']]
@@ -167,18 +168,95 @@ class Mage(Character):
             print(f"{teammate.name} is singed by the fireball and takes {damage} damage!")
         for opp in self.opponents:
             opp.health -= power
-        print(f"Every enemy takes {power} damage from the fireball!")
+        print(f"Every enemy takes {power} damage from the explosion of the fireball!")
 
 
     # Add your cast spell method here
 
 class Archer(Character):
     def __init__(self, name):
-        super().__init__(name, health=80, attack_power=20, action_points=8)
+        super().__init__(name, health=120, attack_power=20, action_points=30)
+        self.set_attack_names('Sonic Shot', 'Barbed Arrow')
+        # ['are shielded', 'will evade', 'have a magic barrier', 'will counter-attack']
+        self.invulnerable_type = self.invulnerable_type[1]  # will evade
+        
+        # special funcs will start with sab or sat, [s]pecial [ab]ility or [s]pecial [at]tack respectively
+        self.specials['1'] = {
+            'type': 'ability',
+            'func': self.sab_install_turret,
+            'args': [self],
+            'name': 'Install Turret',
+            'print_phrase': f"toss a device. Sprinting you step on the spring-loaded machine. A small inanimate turret pops-up points in the general direction of the enemies and begins to fire slowly.",
+            'description': 'Install a small arrow turret, stackable, no limit.'
+        }
+        self.specials['2'] = {
+            'type': 'ability',
+            'func': self.sab_one_step_ahead_evasion,
+            'args': [self],
+            'name': 'One-Step-Ahead Evation',
+            'print_phrase': 'find the flow of time and the universe, and see every attack coming. Each step towards victory will be one ahead of your enemies.',
+            'description': 'Your enemies will be unable to strike you for 7 turns.'
+        }
+        self.specials['3'] = {
+            'type': 'attack',
+            'func': self.sat_multi_shot,
+            'args': [self],
+            'name': 'MultiShot',
+            'print_phrase': 'grab a comical number of arrows, notched them, aimed towards the heavens. You release them and await gravity to align with your goals.',
+            'description': "Shoot 17 arrows simultaneously, random damage to each enemy."
+        }
+        self.specials['4'] = {
+            'type': 'attack',
+            'func': self.sat_odeons_crit_shot,
+            'args': [self],
+            'name': "Odeon's Crit Shot",
+            'print_phrase': "Your body aligns with you mind, your bow an extention of your will, points to your goal. You can't help but aim for that stupid face.",
+            'description': "60 percent of the time it works every time, causing triple damage or none."
+        }
+        
+        #With a {verba[0]}, you {ability['desc']}. The evil wizard stands there {verba[1]}, almost in awe of such awesome power
+        # Your corpse will be paraded around the kingdom, the {verba[2]} {verba[3]} which will instill inaction for the coming generations.\nThe evil wizard's reign will be unending. All hope {verba[4]}
+        self.verba = ['lack of wasted motion', 'trying to track the blur of movement', 'paralyze spell', 'seizing your dead muscles even now, ', 'but a dream of yesteryear']
+
+    def sab_install_turret(self):
+        if len(self.team) > 1:   
+            self.team += [SummonEntity(f"turret{int(self.team[-1].name[-2:])}", 'Good Shot', 'Better Shot', health = 30, attack_power = 15)]
+        else:
+            self.team += [SummonEntity('turret01', 'Good Shot', 'Better Shot', health = 30, attack_power = 15)]
+        # 85% chance of attacking successfully
+        if randint(1, 20) > 3:
+            self.team[-1].take_turn()
+        else:
+            print("The turret missed its first shot.")
+            
+    def sab_one_step_ahead_evasion(self):
+        self.invulnerable_turns = 7  # Invulnerable for 7 turns
+        
+    def sat_multi_shot(self):
+        missed_arrows = 0
+        struck_arrows = 0
+        total_enemy_damage = 0
+        for arrow in range(17):
+            enemy_index = randint(0, len(self.opponents))
+            if enemy_index == len(self.opponents):
+                missed_arrows += 1
+            else:
+                # light attack damage + arrow index num
+                self.opponents[enemy_index].health -= randint(self.attack_power - 5, self.attack_power) + arrow
+        print(f"Of the 17 arrows shot, {missed_arrows} missed, and {struck_arrows} struck causing {total_enemy_damage} damage to the enemy team.")
+        
+    def sat_odeons_crit_shot(self):
+        opponent = self.target_opponent()
+        if randint(1, 5) > 2:
+            damage = self.attack_power * 3
+            opponent.health -= damage
+            print(f"The scent of success burns the nostrils. {opponent} winces, taking {damage} damage.")
+        else:
+            print('You missed by a hair. A distant *twwack!* suggests the arrow embedded itself deep into something well beyond the wizard. You curse quitely.')
         
 class Paladin(Character):
     def __init__(self, name):
-        super().__init__(name, health=120, attack_power=30, action_points=5) 
+        super().__init__(name, health=120, attack_power=30, action_points=8) 
     
 class Traveler(Character):
     def __init__(self, name):
