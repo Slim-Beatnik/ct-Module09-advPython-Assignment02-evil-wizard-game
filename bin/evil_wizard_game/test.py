@@ -126,57 +126,60 @@ from math import *
 fs = open('ew_logo.txt', 'r')
 code = fs.readlines()
 # Read ASCII art and print
-f = open("ew_logo.txt", "r", encoding="cp437")
-cp437_art = f.readlines()
-#art_width = len(ascii_art[1])
-#console = Console(height=len(ascii_art), width=600, style='#2b2d31 on #BE4748')
-chars = '█  ▓▓▓▓▓▓▓▓▒░'
-# art_chars = {}
-# for byte in cp437_art:
-#     print(line)
-#     for ch in line:
-#         print(bin(ch))
-#         art_chars[ord(ch)] = 0
-# print(ord('█'), chr(9608), '\n', art_chars)
-# for ch in art_chars.keys():
-#     console.print(chr(ch))
-# all_char_lines = []
+f = open("ew_logo.txt", "r", encoding='utf-8')
+ascii_art = f.readlines()
+art_width = len(ascii_art[1])
+console = Console(height=len(ascii_art), width=600, style='#2b2d31 on #BE4748')
 
-# for byte in cp437_art:
-#     cp437_code_point = ord(bytes([byte]))
-#     print(f"Byte: {byte}, CP437 Code Point: {cp437_code_point}")
-ords = {}
-for line in cp437_art:
-    for ch in line:
-        ords[ch.encode('cp437')[0]] = 0
-print(ords)
-# for line in cp437_art:
-#     for i, char in enumerate(line):
-#         if all(reduce(lambda a,c: a + c, art_chars.keys()) in line[i]):
-#             all_char_lines.append(i)
-#         art_chars[ord(char)] = char
         
 
-# print('art_chars: ',art_chars)
+
+
+for line in ascii_art:
+    console.print(Padding(line, (0, (console.width - art_width // 2 - 1),0,(console.width - art_width // 2 - 1))), justify='center', end='')
+console.print()
+console.print( Markdown('# The Dark Wizard'), justify='center', style='bold', width=console.width-12)
+
+console.print('')
+console.print(ascii_art[0],'\n')
+
 sys.stdout.reconfigure(encoding='utf-8')
-# g = open('ew_logo_utf8.txt', 'w+', encoding='utf-8')
-# for line in cp437_art:
-#     g.write(line)
 
-# for line in ascii_art:
-#     console.print(Padding(line, (0, (console.width - art_width // 2 - 1),0,(console.width - art_width // 2 - 1))), justify='center', end='')
-# console.print()
-# console.print( Markdown('# The Dark Wizard'), justify='center', style='bold', width=console.width-12)
+console.print(Padding("██", (0,1,0,1), style="#2b2d31 on blue"), justify='center')
+print('██')
 
-# console.print('')
-# console.print(ascii_art[0],'\n')
+from rich import print
+from rich.layout import Layout
 
-# sys.stdout.reconfigure(encoding='utf-8')
+layout = Layout()
+print(layout)
 
-# console.print(Padding("██", (0,1,0,1), style="#2b2d31 on blue"), justify='center')
-# print('██')
+Layout(name='main')
+    layout.split_column(
+        Layout(name="upper"),
+        Layout(name="lower")
+    )
+print(layout)
 
-chars = '█  ▓▓▓▓▓▓▓▓▒░'
-chars = list(map(lambda c: ((ord(c)%255 -6), chr(ord(c)%255 -6)), set(list(chars))))
-chars = list(filter(lambda ch: ch[0] > 32, chars))
-print(ord('█'), chr(9608), '\n', list(chars))
+layout["lower"].split_row(
+    Layout(name="left"),
+    Layout(name="right"),
+)
+print(layout)
+
+layout["right"].split(
+    Layout(Panel("Hello")),
+    Layout(Panel("World!"))
+)
+layout["left"].update(
+    
+)
+print(layout)
+
+
+layout["upper"]
+print(layout)
+print()
+input()
+
+layout
