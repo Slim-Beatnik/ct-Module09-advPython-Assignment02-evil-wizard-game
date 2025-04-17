@@ -1,40 +1,56 @@
-from player_classes import *
-from npc_classes import *
-from intro import *
+from player_classes import Traveler, Warrior, Mage, Archer, Paladin
+from npc_classes import EvilWizard, SummonedEntity
+from intro import title_splash, intro_choice
 from time import sleep
 from rich.theme import Theme
-custom_theme = Theme({
-    "info": "dim cyan",
-    "warning": "magenta",
-    "danger": "bold red",
-    "damage": "bold #ebcc0e"
+from rich.console import Console
+
+game = Theme({
+    "prompt": "blink #bfc5be",
+    "damage": "bold #ebcc0e",
+    "traveler": "bold #8785B7",
+    "warrior": "bold #FF6F61",
+    "mage": "bold #6b5b93",
+    "archer": "bold #88B04B",
+    "paladin": "bold #F7CAC9",
+    "evilwizard": "bold #BE4748",
+    "summonedentity": "bold #FFFD81",
 })
+
+
+
+
+
 # 3 extra classes added
 class_arr = ['Traveler', 'Warrior', 'Mage', 'Archer', 'Paladin']
-
+console = Console(theme=game, style='#bfc5be on #2b2d31')
 # Function to create player character based on user input
 def create_character():
-
-    print("Tell me your character class:")
+    console.clear()
+    console.print("Tell me your character class:")
+    class_choices = ''
     for i, char_class in enumerate(class_arr):
         if i == 0: continue # traveler is hidden
-        print(f'{i}.\t{char_class}')
-    
+        class_choices += f'{i}.\t[{char_class.lower()}]{char_class}[/{char_class.lower()}]\n'
+    console.print(class_choices)
     try:
-        class_choice = int(input("Enter the number of your class choice: "))
-        print('\n\n\n')
+        class_choice = int(console.input("[prompt]Enter the number of your class choice: [/prompt]"))
+        console.print('\n\n\n')
     # CONDITIONAL REQUIRES ADJUSTMENT IF MORE CLASSES WERE ADDED
         if 1 <= class_choice < len(class_arr): # valid range, excluding Traveler
             class_name = class_arr[class_choice]
-            chosen_class = globals()[class_name]
-            name_choice = input(f"Enter your name {class_name}: ")
-            print('\n\n\n')
-            return chosen_class(name_choice)
+            chosen_class = globals()[class_name] # find class by name
+            name_choice = console.input(f"[prompt]Enter your name {class_name}: [/prompt]")
+            
+            return chosen_class(name_choice) 
         else:
             raise ValueError
     except ValueError:
+        # anything that causes a ValueError will return a mysterious traveler named Jack
         print("I'm uncertain what language that was. You must be The Traveler.\nI've heard tell your name is Jack.")
         return Traveler('Jack')
+    sleep(1)
+    console.clear()
     
 
 
@@ -45,23 +61,25 @@ def battle(good_team, bad_team):
     wizard = bad_team[0]
     while wizard.health > 0 and player.health > 0:
         player.take_turn()
+        sleep(1)
         
-        print(separator)
+        console.print(f'{separator}')
         # Evil Wizard's turn to attack and regenerate
         if wizard.health > 0:
             wizard.take_turn()
-            print(separator)
+            sleep(1)
+            console.print(f'[danger]{separator}[/danger]')
 
         if player.health <= 0:
             print(f"{player.name} has been defeated!")
             death_of(player)
-            time.sleep(2)
+            sleep(2)
             prompt_restart(False)
 
         if wizard.health <= 0:
             print(f"")
             print(f"The wizard {wizard.name} has been defeated by {player.name}!")
-            time.sleep(1)
+            sleep(1)
             prompt_restart(True)
         
 def death_of(who_died):
@@ -75,15 +93,15 @@ def prompt_restart(win_bool):
         print('Masterful job, traveller!')
     else:
         print('*Deep Sigh* I can resurrect you.')
-    change_fate = input('Would you like to try again? (y/n)')
+    change_fate = console.input('[prompt]Would you like to try again? (y/n)[/prompt]')
     print('\n\n\n')
     if change_fate.lower() in ['y', 'yes']:
         print('\n\n\n\nVery Well')
-        time.sleep(1)
+        sleep(1)
         main()
     else:
         print('Farewell, Traveller.')
-        time.sleep(2)
+        sleep(2)
         quit()
 
 # Main function to handle the flow of the game

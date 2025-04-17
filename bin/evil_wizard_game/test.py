@@ -152,34 +152,64 @@ from rich import print
 from rich.layout import Layout
 
 layout = Layout()
-print(layout)
 
-Layout(name='main')
-    layout.split_column(
-        Layout(name="upper"),
+
+
+
+from rich.console import Console
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.text import Text
+
+console = Console()
+
+def create_game_layout() -> Layout:
+    layout = Layout(name="root")
+
+    # Split main into 3 vertical sections
+    layout.split(
+        Layout(name="upper", size=10),
+        Layout(name="mid", size=3),
         Layout(name="lower")
     )
-print(layout)
 
-layout["lower"].split_row(
-    Layout(name="left"),
-    Layout(name="right"),
-)
-print(layout)
+    # Split lower into two horizontal sections
+    layout["upper"].split_row(
+        Layout(name="good_team"),
+        Layout(name="bad_team")
+    )
 
-layout["right"].split(
-    Layout(Panel("Hello")),
-    Layout(Panel("World!"))
-)
-layout["left"].update(
+    return layout
+from player_classes import *
+m=Mage('m')
+from npc_classes import *
+s=SummonedEntity('s','a1','a2')
+m.team=[m,s]
+s.team = m.team
+def show_team_stats(team: list) -> str:
+    big_string = ''''''
+    for member in team:
+        big_string += f'''\t--{member.name}--
+        HP: {member.health}
+        Str: {member.attack_power}
+        AP: {member.action_points}\n'''
+    return big_string
     
-)
-print(layout)
+def render_layout(layout: Layout, good_team_stats: str, bad_team_stats: str, narration: str, prompt_text: str):
+    
+    layout["mid"].update(Panel(prompt_text, title="Input", border_style="magenta"))
+    layout["good_team"].update(Panel(good_team_stats, title="Player Team", border_style="green"))
+    layout["bad_team"].update(Panel(bad_team_stats, title="Evil Wizard Team", border_style="red"))
+    layout["lower"].update(Panel(narration, title="Game", border_style="cyan"))
 
+# Mock data
+good_team_stats = show_team_stats(m.team)
+bad_team_stats = "HP: 150\nMana: 60\nStatus: 😡"
+narration = "You stand at the gates of the dark tower.\nThe evil wizard cackles from the shadows..."
+prompt_text = "[Type your next action here]"
 
-layout["upper"]
-print(layout)
-print()
-input()
+layout = create_game_layout()
+render_layout(layout, good_team_stats, bad_team_stats, narration, prompt_text)
 
-layout
+console.clear()
+console.print(layout)

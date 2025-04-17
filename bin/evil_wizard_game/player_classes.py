@@ -78,7 +78,7 @@ class Warrior(Character):
         elif something == power_range[1]:
             something_string = 'Your mom'
         # print description reverted in super().perform_special
-        self.specials[ability_num]['print_phrase'] += f"{something_string} is suddenly flung through the air, hurled at the wizard, doing {something} damage."
+        self.specials[ability_num]['print_phrase'] += f"{something_string} is suddenly flung through the air, hurled at the wizard, doing {something} damage"
 
 # Mage class (inherits from Character)
 class Mage(Character):

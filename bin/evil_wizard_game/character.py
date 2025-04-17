@@ -64,16 +64,16 @@ class Character:
         self.action_points -= 2
         return randint(self.attack_power - 5, self.attack_power + 10), self.attack_names['heavy']
     
-    def attack(self, attack_output):
+    def attack(self, attack_output_tuple): # takes light or heavy attack output as argument tuple( num, attack name as string)
         if type(self).__module__ == 'npc_classes': # if npc class
             opponent = self.opponents[-1] # target last enemy in player.team list
         else:
             opponent = self.target_opponent() # if player, opponents[0] or prompt by opponents length
         if opponent.invulnerable_turns: # once opponent chosen, check if they're currently invulnerable
-            print(f"{opponent.name} {opponent.invulnerable_type} and takes no damage from {self.name}'s {attack_output[1]} attack")
+            print(f"{opponent.name} {opponent.invulnerable_type} and takes no damage from {self.name}'s {attack_output_tuple[1]} attack")
         else:
-            opponent.health -= attack_output[0]
-            print(f"{self.name} attacks {opponent.name} with {attack_output[1]} for {attack_output[0]} damage!")
+            opponent.health -= attack_output_tuple[0]
+            print(f"{self.name} attacks {opponent.name} with {attack_output_tuple[1]} for {attack_output_tuple[0]} damage!")
     
     def perform_special(self, ability_num):
         self.action_points -= 2

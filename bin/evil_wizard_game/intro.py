@@ -3,7 +3,21 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.theme import Theme
 from rich.align import Align
+from rich.live import Live
 
+
+splash_theme = Theme({
+    "text": "#bfc5be",
+    "bg": "#2b2d31",
+    "danger": "#BE4748",
+    "damage": "#ebcc0e",
+    "left": "#aceeee",
+    "right": "#eeacee",
+    "inspect": "#eeeeac",
+    "look": "#8bbf89",
+    "walk": "#f033f0",
+    "bag": "#f0f033",
+})
 # Hidari means left, obvious to those with children approaching 20 yo, B.C. was dr strange and sherlock, Trelawney looks ahead, Jay Ungar - see wizard walk song, and Meinertzhagen had a haversack(bag).
 wizard_names = ['Hidari', 'Gelina Somez of Waverly Palace', 'Strangelock', 'Trelawney The Professed', 'Jay Ungar', 'Meinertzhagen']
 actions = ['left', 'right', 'inspect', 'look', 'walk', 'bag' ]
@@ -43,13 +57,7 @@ print_actions = [
     '''
 ]
 
-splash_theme = Theme({
-    "info": "dim cyan",
-    "warning": "magenta",
-    "bg": "#2b2d31",
-    "danger": "bold #BE4748",
-    "damage": "bold #ebcc0e"
-})
+
 
 with open("ew_logo.txt", "r", encoding="utf-8") as f:
     art = f.read()
@@ -57,18 +65,36 @@ with open("ew_logo.txt", "r", encoding="utf-8") as f:
 art_width = len(art)
 console = Console(theme=splash_theme, style='on #2b2d31')
 
-def title_splash():
-    
-    colored_art = f"[#BE4748 on #2b2d31]{art}[/#BE4748 on #2b2d31]"
-    centered_art = Align.center(Panel.fit(colored_art, subtitle="[frame bold damage]EVIL WIZARD GAME", border_style="damage"))
+def title_splash_animated(file_path="ew_logo.txt", delay=0.01):
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
 
-    console.print(centered_art)
-    Align.center(input("\n[Press Enter to begin your journey...]"))
+    output = ""
+    with Live(refresh_per_second=60) as live:
+        for line in lines:
+            output += line
+            panel = Panel.fit(
+                f"[#BE4748 on #2b2d31]{output}[/#BE4748 on #2b2d31]",
+                title="EVIL WIZARD GAME",
+                subtitle="Let the battle begin!",
+                border_style="#ebcc0e"
+            )
+            live.update(Align.center(panel))
+            time.sleep(delay)
+
+def title_splash():
+    console.clear()
+    title_splash_animated()
+    console.input("\n[blink #aceeee]Press Enter to begin your journey...[/blink #aceeee]")
+    console.theme='[on blink #ebcc0e]'
+    time.sleep(1)
 
 def intro_choice():
+    console.clear()
     console.print('You have traveled for days into a thick forest.\nYou stop out of sheer exhaustion and take stock\nWhat will you do next?\n')
     console.print('You can turn left, turn right, inspect surroundings, look ahead, walk ahead, or open bag.\n')
-    console.print(f'These are the commands: {", ".join(actions)}')
+    # join map with action, wrapped in rich formatting - themes match verbs
+    console.print(f'These are the commands: { ", ".join(map(lambda verb: f'[{verb}]{verb}[/{verb}]', actions)) }')
     
     try:
         choice = input('Choose your action: ').lower()

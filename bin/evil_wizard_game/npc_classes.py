@@ -54,16 +54,17 @@ class EvilWizard(Character):
                 Character.decrement_status_turns(self)
                 return
             if self.action_points >= 1:
-                wizard_attacks = [self.light_attack()]
+                wizard_attacks = [self.light_attack]
             if self.action_points >= 2:  # Only add heavy attack if there's enough action points
-                wizard_attacks += [self.heavy_attack()]
+                wizard_attacks += [self.heavy_attack]
             if not self.cooldown_turns:
                 wizard_attacks += [str(x) for x in range(1, len(self.specials) + 1)] # add specials if not in cooldown
 
             # Randomly choose an attack from the list - scalable w/ added attacks
             automatic_choice = randint(0, len(wizard_attacks) - 1)
             if automatic_choice <= 1:
-                self.attack(wizard_attacks[automatic_choice])
+                # originally called in wizard attacks, but grabbing a tuple by index had side effect
+                self.attack(wizard_attacks[automatic_choice]())  # memory-wise, this makes more sense
             else:
                 # ability num as string from wizard_attacks
                 self.perform_special(wizard_attacks[automatic_choice])
@@ -95,7 +96,7 @@ class EvilWizard(Character):
     def sab_summon_minions(self):
         # remaining minions will be replaced, so no more than 2 minions are allowed simultaneously
         if len(self.team) > 1:
-            print(f"The wizard's remaining living minions screech and howl as they are eaten by their replacements. You will not soon forget that sound.")
+            print(f"The wizard's remaining living minion{'s screech and howl ' if len(self.opponents == 3) else ' screeches and howls '} 'as their replacements devour them.\nYou will not soon forget that sound.")
             for minion in self.team[1:]:  # Remove existing summoned entities
                 del minion
                 gc.collect()  # Force garbage collection to remove the minion from memory
